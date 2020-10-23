@@ -1,0 +1,65 @@
+service: brightcopy
+app: brightcopy
+org: aljetsoft
+
+frameworkVersion: '2'
+
+provider:
+  name: aws
+  runtime: python3.8
+  region: eu-central-1
+
+package:
+  individually: true
+  exclude:
+    - "venv/**"
+    - .gitignore
+
+functions:
+  esearch:
+    handler: handler.esearch
+    events:
+      - http:
+          path: esearch
+          method: post
+    package:
+      individually: true
+      exclude:
+        - "*/**"
+        - ".*"
+        - "*.json"
+        - "*.md"
+        - "*.txt"
+        - "*.py"
+        - "*"
+      include:
+        - handler.py
+        - decorators.py
+        - helpers.py
+  logs:
+    handler: logs.logs
+    events:
+      - http:
+          path: logs
+          method: post
+    package:
+      individually: true
+      exclude:
+        - "*/**"
+        - ".*"
+        - "*.json"
+        - "*.md"
+        - "*.txt"
+        - "*.py"
+        - "*"
+      include:
+        - logs.py
+        - helpers.py
+        - decorators.py
+
+plugins:
+  - serverless-python-requirements
+
+custom:
+  pythonRequirements:
+    dockerizePip: non-linux
