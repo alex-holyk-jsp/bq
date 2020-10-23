@@ -24,7 +24,7 @@ def handle_exceptions(func):
             return generate_response(400, json.dumps(body), args[0].get('headers'), args[0].get('isBase64Encoded'))
         except Exception as ex:
             body = {
-                'error': repr(ex)
+                'error': str(ex)
             }
             return generate_response(500, json.dumps(body), args[0].get('headers'), args[0].get('isBase64Encoded'))
     return wrapper
@@ -34,20 +34,20 @@ def log_data(func):
     @functools.wraps(func)
     def wrapper(*args, **kwargs):
         result = func(*args, **kwargs)
+        item = {}
+        now = datetime.now()
+        item['Timestamp'] = int(datetime.timestamp(now))
+        body = args[0].get('body')
+        body_json = json.loads(body) if body else {}
+        item['UserEmail'] = str(body_json.get('user_email'))
+        item['Body'] = body or str(None)
+        response_body = json.loads(result.get('body'))
+        error = response_body.get('error') if response_body else ''
+        item['Response'] = json.dumps({
+            'statusCode': result.get('statusCode'),
+            'error': error
+        })
         try:
-            item = {}
-            now = datetime.now()
-            item['Timestamp'] = int(datetime.timestamp(now))
-            body = args[0].get('body')
-            body_json = json.loads(body) if body else {}
-            item['UserEmail'] = str(body_json.get('user_email'))
-            item['Body'] = body or str(None)
-            response_body = json.loads(result.get('body'))
-            error = response_body.get('error') if response_body else ''
-            item['Response'] = json.dumps({
-                'statusCode': result.get('statusCode'),
-                'error': error
-            })
             table.put_item(
                 Item=item
             )

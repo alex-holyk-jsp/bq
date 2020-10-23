@@ -28,7 +28,7 @@ def logs(event, context):
             KeyConditionExpression=key_condition_expression,
             ScanIndexForward=(not desc_order)
         )
-        mapped_data = list(map(mapItem, data['Items']))
+        mapped_data = list(map(map_item, data['Items']))
     else:
         scan_kwargs = {}
         if timestamp:
@@ -37,7 +37,7 @@ def logs(event, context):
 
         data = table.scan(**scan_kwargs)
         mapped_data = sorted(list(
-            map(mapItem, data['Items'])), key=lambda x: x['timestamp'], reverse=desc_order)
+            map(map_item, data['Items'])), key=lambda x: x['timestamp'], reverse=desc_order)
 
     return {
         'statusCode': 200,
@@ -45,7 +45,7 @@ def logs(event, context):
     }
 
 
-def mapItem(item):
+def map_item(item):
     return {
         'user_email': item.get('UserEmail'),
         'timestamp': int(item['Timestamp']),
